@@ -103,9 +103,13 @@ def init_ptb(vars):
     message_handler = MessageHandler(filters.TEXT & (~filters.COMMAND), reply)
     application.add_handler(message_handler)
 
-    asyncio.run(application.initialize())
-
     return application
+
+def get_prompt_input(context_data, question):
+    return {"bot_name": vars['bot_name'], "location": vars['location'], "date": vars['date'], "time": vars['time'], "context": context_data, "question": question}
+
+def fetch_ctx_data():
+    return requests.get(vars['context_file_url'])
 
 # set_debug(True)
 
@@ -117,65 +121,23 @@ llm_chain = init_gpt4all(config)
 application = init_ptb(vars)
 logger.info("Function initialization completed!")
 
-def get_prompt_input(context_data, question):
-    return {"bot_name": vars['bot_name'], "location": vars['location'], "date": vars['date'], "time": vars['time'], "context": context_data, "question": question}
-
-def fetch_ctx_data():
-    return requests.get(vars['context_file_url'])
-
 def handler(event, context):
-    logger.info(f"New event: {event}")
+    return asyncio.run(handle_event(event))
 
+async def handle_event(event):
     try:
-        bot_update = Update.de_json(json.loads(event["body"]), application.bot)
-        asyncio.run(application.process_update(bot_update))
-        
-        return {
-                'statusCode': 200,
-                'body': json.dumps("DONE")
-            }
-    except Exception as e:
-        logger.exception("Handler failed: {}", e)
-        return {
-            'statusCode': 500,
-            'body': json.dumps({'Internal Error': str(e)})
-        }
-
-async def event_handler(event):
-    logger.info(f"Handling new event: {event}")
-
-    body = json.loads(event.get("body", "{}"))
-
-    if "body" in body:
-        body = body.get("body")
-        body = json.loads(body)
-
-    message = body.get("message")
-    logger.info(f"New message: {message}")
-
-    if message is None:
-        return {
-            'statusCode': 400,
-            'body': json.dumps({'error': 'No message was provided'})
-        }
-
-    try:
-        ctx_data = fetch_ctx_data() if vars['context_file_url'] else ""
-        logger.info(f"New context data: {ctx_data}")
-
-        prompt_input = get_prompt_input(ctx_data, message)
-        response = llm_chain.invoke(prompt_input)
-        logger.info(f"New response: {response}")
+        async with application:
+            await application.process_update(Update.de_json(json.loads(event["body"]), application.bot))
 
         return {
             'statusCode': 200,
-            'body': json.dumps(response)
+            'body': 'Success'
         }
 
     except Exception as e:
-        logger.exception("Handling failed: {}", e)
+        logger.exception("handle_event failed: {}", e)
         return {
             'statusCode': 500,
-            'body': json.dumps({'Internal Error': str(e)})
+            'body': 'Failure'
         }
-
+    
