@@ -30,6 +30,8 @@ WORKDIR ${FUNCTION_DIR}
 # Copy in the built dependencies
 COPY --from=build-image ${FUNCTION_DIR} ${FUNCTION_DIR}
 
+COPY config/config.yaml ${FUNCTION_DIR}/config.yaml
+
 # Copy the code eventually, so that code modifications result in less modification over the layers.
 COPY function/lambda_function.py ${FUNCTION_DIR}/lambda_function.py
 

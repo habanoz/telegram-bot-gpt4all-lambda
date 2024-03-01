@@ -5,3 +5,4 @@ langchain-core==0.1.28
 packaging
 requests
 loguru
+PyYAML
