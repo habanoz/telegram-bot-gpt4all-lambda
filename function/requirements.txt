@@ -2,6 +2,6 @@ gpt4all==2.2.1
 langchain==0.1.9
 langchain-community==0.0.24
 langchain-core==0.1.28
-packaging==23.2
-requests==2.31.0
+packaging
+requests
 loguru
