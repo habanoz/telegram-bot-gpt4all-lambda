@@ -6,3 +6,4 @@ packaging
 requests
 loguru
 PyYAML
+python-telegram-bot==20.8
