@@ -126,7 +126,7 @@ llm_chain = init_gpt4all(config)
 application = init_ptb(vars)
 logger.info("Function initialization completed!")
 
-def handler(event, context):
+def lambda_handler(event, context):
     return asyncio.run(handle_event(event))
 
 async def handle_event(event):

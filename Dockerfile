@@ -42,4 +42,4 @@ RUN chmod 755 /usr/bin/aws-lambda-rie /entry.sh
 
 # Use the entry script as the container's entry point
 ENTRYPOINT [ "/entry.sh" ]
-CMD [ "lambda_function.handler" ]
+CMD [ "lambda_function.lambda_handler" ]
