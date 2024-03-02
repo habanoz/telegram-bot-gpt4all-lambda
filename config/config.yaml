@@ -2,7 +2,9 @@ model_file_name: "./mistral-7b-instruct-v0.1.Q4_0.gguf"
 model:
   temp : 0.7
   top_p : 0.1
-  max_tokens : 2048
+  token_limit : 2048 # is not used anywhere
+  n_generate : 200
+handler_timeout : 57
 prompt: |
   [INST] You are {bot_name}, a friendly chatbot.
   - Today is {date}

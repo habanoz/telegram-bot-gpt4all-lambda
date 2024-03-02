@@ -28,6 +28,7 @@ def init_env_vars(vars):
     vars['location'] = os.getenv("BOT_LOCATION", "Istanbul/Turkey")
     vars['context_file_url'] = os.getenv("CTX_FILE_URL")
     vars['bot_token'] = os.getenv("TELEGRAM_TOKEN")
+    vars['echo_enabled'] = os.getenv("ECHO_ENABLED", "false")
 
     assert vars['bot_token']!=None, "TELEGRAM_TOKEN must be provided!"
     assert len(vars['bot_token'])>0, "TELEGRAM_TOKEN must be set!"
@@ -69,7 +70,7 @@ def init_gpt4all(cfg):
         llm = GPT4All(model=cfg.model_file_name, 
                     verbose=True, 
                     temp=cfg.model.temp, 
-                    max_tokens=cfg.model.max_tokens, 
+                    n_predict = cfg.model.n_generate, 
                     top_p=cfg.model.top_p)
         return LLMChain(prompt=prompt_template, llm=llm)
     except Exception as e:
@@ -81,6 +82,10 @@ async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = update.message.text
+
+    if vars['echo_enabled'].lower()=='true':
+        await context.bot.send_message(chat_id=update.effective_chat.id, text="Echoed:"+message)
+        return "done" 
 
     ctx_data = fetch_ctx_data() if vars['context_file_url'] else ""
     logger.info(f"New context data: {ctx_data}")
@@ -126,18 +131,26 @@ def handler(event, context):
 
 async def handle_event(event):
     try:
+        logger.info(f"New event: {event}")
+
         async with application:
-            await application.process_update(Update.de_json(json.loads(event["body"]), application.bot))
+            await asyncio.wait_for(application.process_update(Update.de_json(json.loads(event["body"]), application.bot)), timeout=config.handler_timeout)
 
         return {
             'statusCode': 200,
             'body': 'Success'
         }
-
+    
+    except asyncio.TimeoutError:
+        logger.error("handle_event expired")
+        return {
+            'statusCode': 200, # do not retry
+            'body': 'Timeout'
+        }
     except Exception as e:
         logger.exception("handle_event failed: {}", e)
         return {
-            'statusCode': 500,
+            'statusCode': 200, # do not retry
             'body': 'Failure'
         }
     
