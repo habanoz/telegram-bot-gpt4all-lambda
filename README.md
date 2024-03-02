@@ -100,16 +100,25 @@ curl https://api.telegram.org/bot<TELEGRAM_TOKEN>/getWebHookInfo
 
 As of first quarter of 2024:
 
-In my tests I used input prompts roughly 100 tokens and generated at most 100 tokens. Lambda execution times took up to 55 seconds, hard limit for execution time being 60 seconds, in an environment with 5500MB of memory and x64 architecture. 
+Selected model fits to an environment with at least 5.5GB memory. x64 architecture is selected. 10G disk space is allocated, which is not included in price calculations.
+
+In my tests I used input prompts roughly 100 tokens and generated at most 100 tokens. Lambda execution times took up to 55 seconds, hard limit for execution time being 60 seconds. 
 This is roughly equivalent to having 200 tokens for a 60*5.5GB = 330GB-seconds execution time. Considering AWS lambda offers 400,000GB-seconds of free compute time per month, this is equivalent of processing 1200 requests and generating 120K tokens (240K tokens in total including input tokens).
 
 What if we took another approach and utilized OpenAI GPT-3.5 Turbo for this purpose, which is a very efficient and capable model. Its price is $0.5/1M input tokens and $1.5/1M output tokens. Let's take average which means it costs $1/M input and output tokens. It costs a quarter of a dollar for the same amount of tokens (240K tokens), which is next to free.
 
 Let's move forward and put it to scale. Let's consider moving to 1M tokens (input+output), which costs for $1 with GPT-3.5 Turbo. For the lambda function, we need 5000 executions to reach 1M tokens. According to AWS Lambda Pricing Calculator, 5000 executions on a x64 platform with a 5.5GB memory costs around $20 after deducing free usages. 
 
-It may be possible to optimize lambda function to increase efficiency and decrease costs but when combined with cost and quality I do not see how it would be possible to beat GPT-3.5 Turbo. After all, AWS Lambda is not optimized for such loads and it is not surprising to see that it is not the best option. Also note that this study targets the telegram bot use case, other use cases may involve different dynamics and conclusions.
+It may be possible to optimize the lambda function to increase the efficiency and decrease the costs but when combined with cost and quality I do not see how it would be possible for the studied configuration to beat GPT-3.5 Turbo configuration. After all, AWS Lambda is not optimized for such loads and it is not surprising to see that it is not the best option. Also note that this study targets the telegram bot use case, other use cases may involve different dynamics and conclusions.
+
+#### Alternative Approach : Using GPT-3.5-Turbo
+
+Within the light of these findings, a compelling alternative to the studied configuration is to utilize GPT-3.5-Turbo. A lambda function can make GPT-3.5-Turbo calls instead of using a local model. This can diminish memory requirements down to 1GB or less. Assuming GPT-3.5-Turbo will generate 100 tokens within 5 seconds, within this configuration, AWS lambda function can process 80000 requests freely, per month. Within the same 100 tokens input and 100 tokens output schema, 80000 requests corresponds to 1.6M tokens which costs only $1.6 per month.
+
+This approach is much more scalable. It is possible to increase prompt and completion lengths without worrying about lambda function limitations.
 
 ## References:
+
 1- [List of OCI client endpoints for each region](https://docs.aws.amazon.com/general/latest/gr/ecr.html)
 2- [AWS Lambda Pricing](https://aws.amazon.com/lambda/pricing/)
 3- [AWS Lambda Pricing Calculator](https://s3.amazonaws.com/lambda-tools/pricing-calculator.html)
