@@ -142,7 +142,7 @@ async def handle_event(event):
         }
     
     except asyncio.TimeoutError:
-        logger.error("handle_event expired")
+        logger.warn("handle_event expired")
         return {
             'statusCode': 200, # do not retry
             'body': 'Timeout'
