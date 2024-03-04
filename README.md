@@ -125,6 +125,9 @@ In light of these findings, a compelling alternative to the studied configuratio
 
 This approach is much more scalable. Increasing prompt and completion lengths without worrying about lambda function limitations is possible.
 
+For alternative implementation that utilizes OpenAI models, see following repository.
+[OpenAI Telegram Bot](https://github.com/habanoz/telegram-bot-llm-openai-lambda)
+
 ## References:
 1. [List of OCI client endpoints for each region](https://docs.aws.amazon.com/general/latest/gr/ecr.html)
 2. [AWS Lambda Pricing](https://aws.amazon.com/lambda/pricing/)
