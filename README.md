@@ -6,6 +6,8 @@ A lambda function is container-based as opposed to an archive-based function. Be
 
 Language model file is also included in the container which makes the container size big. (Using archive-based functions would not help in this situation either). To not send a whole language model file each time the source code is modified, the docker file is designed to make use of layers e.g. source code file is copied later in the process. After the initial container creation, subsequent containers are tagged with the `--cache-from` option.
 
+Check out my [blog post](https://habanoz.github.io/tech-feed/analysis/aws-lambda-llm-telegram-bot/) about this work.
+
 ## AWS CLI
 
 Here are resources to prepare the AWS environment.
